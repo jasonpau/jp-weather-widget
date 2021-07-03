@@ -25,5 +25,5 @@ if (! defined('ABSPATH')) {
     <?= esc_html( $this->last_updated ) ?>
 </p>
 <div>
-    <?= esc_html( $this->current_weather ) ?>
+    <?= esc_html( json_encode( $this->current_weather ) ) ?>
 </div>

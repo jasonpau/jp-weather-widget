@@ -10,14 +10,15 @@ class JPWeatherWidget {
     const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
     public function __construct() {
-        if ( ! empty( $_POST['api_key'] ) && current_user_can( 'manage_options' ) ) {
-            update_option( 'jpww_open_weather_api_key', sanitize_text_field( $_POST['api_key'] ) );
-        }
 
         $this->api_key = get_option( 'jpww_open_weather_api_key', '' );
         $this->current_weather = json_decode( get_transient( 'jpww_current_weather' ) );
         $this->last_updated_timestamp = get_transient( 'jpww_current_weather_last_updated' );
         $this->last_updated = $this->humanized_local_timestamp( $this->last_updated_timestamp );
+
+        // Plugins load before we're able to check user permissions, so to prevent unauthorized
+        // users from saving an API key we have to use a hook.
+        add_action( 'plugins_loaded', [$this, 'save_api_key'] );
 
         add_action( 'admin_menu', [ $this, 'admin_page' ], 100 );
 
@@ -54,6 +55,15 @@ class JPWeatherWidget {
      */
     public function admin_settings_panel_setup() {
         require_once __DIR__ . '/../views/admin.php';
+    }
+
+    public function save_api_key() {
+        if ( ! empty( $_POST['api_key'] ) && current_user_can( 'manage_options' ) ) {
+            update_option( 'jpww_open_weather_api_key', sanitize_text_field( $_POST['api_key'] ) );
+
+            // Go ahead and get new weather data if we just uploaded a new API key.
+            $this->jpww_fetch_weather_data();
+        }
     }
 
     /**
