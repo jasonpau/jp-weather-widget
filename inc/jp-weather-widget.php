@@ -27,6 +27,7 @@ class JPWeatherWidget {
         // This is the hook to rule them all.
         add_action( 'jpww_cron_hook', [$this, 'jpww_fetch_weather_data'] );
 
+        // Set up our own shortcode
         add_shortcode( 'jp_weather_widget', [$this, 'get_widget'] );
 
         // Deactivate the background WP Cron calls if the plugin is deactivated.
@@ -89,8 +90,13 @@ class JPWeatherWidget {
 
     // Need to create a shortcode?
     public function get_widget() {
-        $weather = json_decode( get_transient( 'jpww_current_weather' ) );
-        return intval( $weather->main->temp );
+        $weather = json_decode( $this->current_weather );
+
+        ob_start();
+
+        require_once __DIR__ . '/../views/widget.php';
+
+        return ob_get_clean();
     }
 
     // Need to create a really basic HTML output, containing the weather info
