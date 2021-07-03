@@ -7,10 +7,11 @@ if (! defined('ABSPATH')) {
 
 $weather = $this->current_weather;
 
+if ( $weather->cod === 200 ) :
 ?>
 
 <div class="jp-weather-widget-container">
-    <?php if ( $weather?->weather[0] ) : ?>
+    <?php if ( $weather->weather[0] ) : ?>
         <img class="jp-weather-widget-icon"
             src="http://openweathermap.org/img/wn/<?= esc_attr( $weather->weather[0]->icon ) ?>@2x.png"
             alt="<?= esc_attr( $weather->weather[0]->description ) ?>">
@@ -21,3 +22,11 @@ $weather = $this->current_weather;
         </div>
     <?php endif; ?>
 </div>
+
+<?php else : ?>
+
+<div class="jp-weather-widget-container">
+    <p>Unable to load weather.</p>
+</div>
+
+<?php endif; ?>

@@ -5,7 +5,7 @@
  *
  * Plugin Name:  Weather Widget
  * Description:  A super minimal weather widget plugin for WordPress.
- * Version:      1.0.2
+ * Version:      1.0.3
  * Author:       Jason Pau
  * Author URI:   https://jasonpau.io
  * Text Domain:  jp-weather-widget

@@ -13,7 +13,7 @@ class JPWeatherWidget {
 
         $this->api_key = get_option( 'jpww_open_weather_api_key', '' );
         $this->current_weather = json_decode( get_transient( 'jpww_current_weather' ) );
-        $this->last_updated = $this->humanized_local_timestamp( $this->current_weather->dt );
+        $this->last_updated = $this->humanized_local_timestamp( $this->current_weather->dt ?? '' );
 
         // Plugins load before we're able to check user permissions, so to prevent unauthorized
         // users from saving an API key we have to use a hook.
