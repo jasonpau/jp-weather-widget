@@ -73,7 +73,7 @@ class JPWeatherWidget {
     private function humanized_local_timestamp( $timestamp ) {
         $time = new DateTime();
         $time->setTimezone( wp_timezone() );
-        $time->setTimestamp( $timestamp );
+        $time->setTimestamp( invtal( $timestamp ) );
         return $time->format( 'D, n-d-Y \a\t g:i a' ); 
     }
 
@@ -106,7 +106,7 @@ class JPWeatherWidget {
         $body = json_decode( $response['body'] );
 
         set_transient( 'jpww_current_weather', json_encode( $body ) );
-        set_transient( 'jpww_current_weather_last_updated', $body->dt );
+        set_transient( 'jpww_current_weather_last_updated', $body?->dt );
     }
 
     /**
