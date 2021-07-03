@@ -13,8 +13,7 @@ class JPWeatherWidget {
 
         $this->api_key = get_option( 'jpww_open_weather_api_key', '' );
         $this->current_weather = json_decode( get_transient( 'jpww_current_weather' ) );
-        $this->last_updated_timestamp = get_transient( 'jpww_current_weather_last_updated' );
-        $this->last_updated = $this->humanized_local_timestamp( $this->last_updated_timestamp );
+        $this->last_updated = $this->humanized_local_timestamp( $this->current_weather->dt );
 
         // Plugins load before we're able to check user permissions, so to prevent unauthorized
         // users from saving an API key we have to use a hook.
@@ -73,7 +72,7 @@ class JPWeatherWidget {
     private function humanized_local_timestamp( $timestamp ) {
         $time = new DateTime();
         $time->setTimezone( wp_timezone() );
-        $time->setTimestamp( invtal( $timestamp ) );
+        $time->setTimestamp( intval( $timestamp ) );
         return $time->format( 'D, n-d-Y \a\t g:i a' ); 
     }
 
@@ -106,7 +105,6 @@ class JPWeatherWidget {
         $body = json_decode( $response['body'] );
 
         set_transient( 'jpww_current_weather', json_encode( $body ) );
-        set_transient( 'jpww_current_weather_last_updated', $body?->dt );
     }
 
     /**
@@ -135,7 +133,6 @@ class JPWeatherWidget {
     public function deactivate() {
         // Remove transient data
         delete_transient( 'jpww_current_weather' );
-        delete_transient( 'jpww_current_weather_last_updated' );
 
         // Remove WP Cron hook
         $timestamp = wp_next_scheduled( 'jpww_cron_hook' );
