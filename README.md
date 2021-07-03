@@ -3,7 +3,9 @@ A super minimal weather widget plugin for WordPress
 
 ## Requirements
 
-Coming soon...
+* PHP 8.0.2+
+* WP 5.7.2+
+* API Key from openweathermap.org
 
 ## Installation
 

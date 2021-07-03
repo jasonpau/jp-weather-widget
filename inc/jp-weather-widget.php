@@ -10,13 +10,14 @@ class JPWeatherWidget {
     const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
     public function __construct() {
-
         if ( ! empty( $_POST['api_key'] ) && current_user_can( 'manage_options' ) ) {
             update_option( 'jpww_open_weather_api_key', sanitize_text_field( $_POST['api_key'] ) );
         }
 
         $this->api_key = get_option( 'jpww_open_weather_api_key', '' );
         $this->current_weather = get_transient( 'jpww_current_weather' );
+        $this->last_updated_timestamp = get_transient( 'jpww_current_weather_last_updated' );
+        $this->last_updated = $this->humanized_local_timestamp( $this->last_updated_timestamp );
 
         add_action( 'admin_menu', [ $this, 'admin_page' ], 100 );
 
@@ -50,6 +51,13 @@ class JPWeatherWidget {
     // This generates the normal admin settings page.
     public function admin_settings_panel_setup() {
         require_once __DIR__ . '/../views/admin.php';
+    }
+
+    private function humanized_local_timestamp( $timestamp ) {
+        $time = new DateTime();
+        $time->setTimezone( wp_timezone() );
+        $time->setTimestamp( $timestamp );
+        return $time->format( 'D, n-d-Y \a\t g:i a' ); // Mon, 1-12-2021 at 3:45 pm
     }
 
     private function schedule_cron() {

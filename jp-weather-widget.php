@@ -15,5 +15,3 @@
 require_once( 'inc/jp-weather-widget.php' );
 
 $jp_weather_widget = new JPWeatherWidget();
-
-$jp_weather_widget->jpww_fetch_weather_data();
