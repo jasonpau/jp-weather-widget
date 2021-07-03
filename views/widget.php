@@ -5,6 +5,8 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+$weather = $this->current_weather;
+
 ?>
 
 <div class="jp-weather-widget-container">

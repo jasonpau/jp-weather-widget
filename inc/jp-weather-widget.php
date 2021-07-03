@@ -15,7 +15,7 @@ class JPWeatherWidget {
         }
 
         $this->api_key = get_option( 'jpww_open_weather_api_key', '' );
-        $this->current_weather = get_transient( 'jpww_current_weather' );
+        $this->current_weather = json_decode( get_transient( 'jpww_current_weather' ) );
         $this->last_updated_timestamp = get_transient( 'jpww_current_weather_last_updated' );
         $this->last_updated = $this->humanized_local_timestamp( $this->last_updated_timestamp );
 
@@ -49,25 +49,36 @@ class JPWeatherWidget {
         );
     }
 
-    // This generates the normal admin settings page.
+    /**
+     * This generates the normal admin settings page.
+     */
     public function admin_settings_panel_setup() {
         require_once __DIR__ . '/../views/admin.php';
     }
 
+    /**
+     * E.g. Mon, 1-12-2021 at 3:45 pm
+     * Based on the timezone set in the WP settings.
+     */
     private function humanized_local_timestamp( $timestamp ) {
         $time = new DateTime();
         $time->setTimezone( wp_timezone() );
         $time->setTimestamp( $timestamp );
-        return $time->format( 'D, n-d-Y \a\t g:i a' ); // Mon, 1-12-2021 at 3:45 pm
+        return $time->format( 'D, n-d-Y \a\t g:i a' ); 
     }
 
+    /**
+     * Schedules our "cron" with WP Cron.
+     */
     private function schedule_cron() {
         if ( ! wp_next_scheduled( 'jpww_cron_hook' ) ) {
             wp_schedule_event( time(), 'fifteen_minutes', 'jpww_cron_hook' );
         }
     }
 
-    // Need to periodically call the API...every 15 minutes?
+    /**
+     * Call the openweathermap.org API to get updated weather info.
+     */
     public function jpww_fetch_weather_data() {
         $query_params = build_query([
             'q' =>      'san+juan+capistrano',
@@ -78,7 +89,7 @@ class JPWeatherWidget {
         $response = wp_remote_get( self::BASE_URL . '?' . $query_params );
 
         if ( is_wp_error( $response ) ) {
-            // TODO add some kind of error handling.
+            // TODO: add some kind of error handling.
             return;
         }
 
@@ -88,20 +99,18 @@ class JPWeatherWidget {
         set_transient( 'jpww_current_weather_last_updated', $body->dt );
     }
 
-    // Need to create a shortcode?
+    /**
+     * Returns the widget HTML output.
+     */
     public function get_widget() {
-        $weather = json_decode( $this->current_weather );
-
         ob_start();
-
-        require_once __DIR__ . '/../views/widget.php';
-
+        include __DIR__ . '/../views/widget.php';
         return ob_get_clean();
     }
 
-    // Need to create a really basic HTML output, containing the weather info
-    // Styling will come from theme CSS mostly?
-
+    /**
+     * Adds a 15 minute cron interval for us to use since WP doesn't include it by default.
+     */
     public function add_cron_interval( $schedules ) {
         $schedules['fifteen_minutes'] = [
             'interval' => 900, // 15 * 60 = 900 seconds
@@ -110,6 +119,9 @@ class JPWeatherWidget {
         return $schedules;
     }
 
+    /**
+     * Basic plugin tear-down.
+     */
     public function deactivate() {
         // Remove transient data
         delete_transient( 'jpww_current_weather' );
